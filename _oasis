@@ -14,4 +14,4 @@ Executable mir_build
   Custom:         true
   CompiledObject: native
   Install:        false
-  BuildDepends:   lwt, lwt.unix, xml-light2
+  BuildDepends:   lwt, lwt.unix, xml-light2, threads, xapi-client, stdext

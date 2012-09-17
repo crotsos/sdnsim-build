@@ -5,9 +5,14 @@ open Lwt_unix
 let lwt_open_out file = 
   openfile file [O_WRONLY; O_SYNC] 0o777 
 
-let lwt_output_string fd str = 
-  lwt _ = write fd str 0 (String.length str) in 
-    return ()
+let lwt_output_string fd str =
+  let rec write_inner fd str =  function
+    | l when (l = (String.length str)) -> return ()
+    | l -> 
+        lwt r = write fd str l ((String.length str) - l) in
+          write_inner fd str (l + r)
+  in
+    write_inner fd str 0
 
 let lwt_close_out fd = 
   close fd
@@ -15,7 +20,7 @@ let lwt_close_out fd =
 let generate_simulation module_name nodes links =
   lwt out = lwt_open_out (sprintf "topo_%s.ml" module_name) in
   lwt _ = lwt_output_string out "let run () =\n" in  
-  lwt _ = Lwt_list.iter_p (
+  lwt _ = Lwt_list.iter_s (
     fun (host, main, params) ->
       let str_param = 
         List.fold_right (
@@ -24,7 +29,10 @@ let generate_simulation module_name nodes links =
             | None -> sprintf "%s %s" r v
             | Some(n) -> sprintf "%s ~%s:%s" r n v
         ) params "" in 
-      let str_node = 
+      let _ = 
+        printf "\tlet _ = OS.Topology.add_node \"%s\" (%s.%s %s) in\n%!" 
+          host module_name main str_param in
+       let str_node = 
         sprintf "\tlet _ = OS.Topology.add_node \"%s\" (%s.%s %s) in\n" 
           host module_name main str_param in
         lwt_output_string out str_node

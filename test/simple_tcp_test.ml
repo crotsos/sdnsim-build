@@ -69,7 +69,7 @@ let rec echo_udp dst buf =
   
 let rec echo_client_udp mgr dst =
   try_lwt
-    let data = Io_page.create 1460 in
+    let data = Cstruct.sub (Io_page.get ()) 0 1450 in
     let rec send_data () = 
         lwt _ = Datagram.UDPv4.send mgr dst data in
         lwt () = Time.sleep 1.0 in
@@ -128,9 +128,9 @@ let host_inner host_id () =
 let run () =
   let _ = OS.Time.set_duration 10 in 
   (* Define participating nodes *)
-  let _ = Topology.add_node "node1" (host_inner 1) in
-  let _ = Topology.add_node "node2" (host_inner 2) in
+  let _ = OS.Topology.add_node "node1" (host_inner 1) in
+  let _ = OS.Topology.add_node "node2" (host_inner 2) in
 
   (* Define topology *)
-  let _ = Topology.add_link "node1" "node2" in
+  let _ = OS.Topology.add_link "node1" "node2" in
     ()
