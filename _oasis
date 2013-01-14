@@ -9,9 +9,9 @@ Plugins:     META (0.3)
 BuildTools:  ocamlbuild
 
 Executable mir_build
-  Path:           .
+  Path:           src/
   MainIs:         mir_build.ml
   Custom:         true
   CompiledObject: native
   Install:        false
-  BuildDepends:   lwt, lwt.unix, xml-light2, threads, xapi-client, stdext
+  BuildDepends:   lwt, lwt.syntax, xml-light, threads
